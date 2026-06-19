@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>Oguz AI – Türkmen Emeli Aň</title>
+<meta name="description" content="Okuwçylar, talyplar we bilim işgärleri üçin türkmen emeli aňy">
+<meta name="theme-color" content="#0a0c10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oguz AI">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#0a0c10;--surface:#111318;--border:#1e2230;
+  --gold:#c9902a;--gold-dim:#8a6218;--accent:#e8b84b;
+  --text:#e2e4ea;--muted:#6b7080;--user-bg:#161a26;--ai-bg:#0f1219;
+  --menu-w:280px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;flex-direction:column;}
+
+/* ── OVERLAY ── */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s;}
+#overlay.show{opacity:1;pointer-events:all;}
+
+/* ── SIDE MENU ── */
+#menu{position:fixed;top:0;left:0;bottom:0;width:var(--menu-w);background:#0d1018;border-right:1px solid var(--border);z-index:101;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+#menu.open{transform:translateX(0);}
+.menu-head{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.menu-logo{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;background:#0a0c10;font-family:'Cinzel',serif;font-size:13px;color:var(--accent);flex-shrink:0;}
+.menu-head h2{font-family:'Cinzel',serif;font-size:15px;color:var(--accent);}
+.menu-sections{flex:1;overflow-y:auto;padding:8px 0;}
+.menu-sections::-webkit-scrollbar{width:4px;}
+.menu-sections::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.menu-item{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;color:var(--muted);font-size:14px;transition:all .18s;border:none;background:none;width:100%;text-align:left;}
+.menu-item:active{background:rgba(201,144,42,.12);}
+.menu-item svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.menu-item:hover,.menu-item:active{color:var(--accent);}
+.menu-divider{height:1px;background:var(--border);margin:6px 0;}
+.recents-label{padding:8px 16px 4px;font-size:10px;font-weight:600;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.1em;}
+.recent-item{display:flex;align-items:center;gap:8px;padding:10px 16px;cursor:pointer;color:var(--muted);font-size:13px;transition:all .18s;border:none;background:none;width:100%;text-align:left;overflow:hidden;}
+.recent-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.recent-item:hover,.recent-item:active{background:rgba(201,144,42,.07);color:var(--text);}
+.recent-item svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.no-recents{padding:10px 16px;font-size:12px;color:var(--muted);font-style:italic;}
+.menu-footer{padding:12px 10px;border-top:1px solid var(--border);}
+.new-chat-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),#a06c18);border:none;border-radius:10px;color:#0a0c10;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s;}
+.new-chat-btn:active{opacity:.8;}
+.new-chat-btn svg{width:16px;height:16px;stroke:#0a0c10;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── HEADER LOGO ── */
+.header-logo{width:38px;height:38px;border-radius:10px;object-fit:cover;flex-shrink:0;box-shadow:0 0 12px rgba(0,210,180,.25);}
+
+/* ── HEADER ── */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10;}
+/* 3-line hamburger */
+.hamburger{background:none;border:none;cursor:pointer;padding:6px;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;width:36px;height:36px;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--muted);border-radius:2px;transition:background .2s;}
+.hamburger:hover span,.hamburger:active span{background:var(--accent);}
+.logo-ring{width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 35%,#1e1608,#0a0c10);box-shadow:0 0 10px rgba(201,144,42,.3);flex-shrink:0;position:relative;overflow:hidden;}
+.logo-ring::before{content:'';position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(var(--gold) 0deg,transparent 120deg,var(--gold-dim) 240deg,var(--gold) 360deg);animation:spin 6s linear infinite;z-index:0;}
+.logo-ring em{position:relative;z-index:1;font-family:'Cinzel',serif;font-size:14px;font-weight:900;color:var(--accent);font-style:normal;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.header-info h1{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--accent);letter-spacing:.06em;line-height:1;}
+.header-info p{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.04em;text-transform:uppercase;}
+.status-pill{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);background:rgba(52,199,123,.08);border:1px solid rgba(52,199,123,.2);border-radius:20px;padding:4px 10px;flex-shrink:0;}
+.dot{width:6px;height:6px;border-radius:50%;background:#34c77b;box-shadow:0 0 5px rgba(52,199,123,.7);animation:pulse 2s ease-in-out infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── CHAT AREA ── */
+#chatWrap{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+#chat{flex:1;overflow-y:auto;padding:20px 0 10px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
+#chat::-webkit-scrollbar{width:3px;}
+#chat::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── WELCOME (centered) ── */
+#welcome{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:100%;max-width:500px;text-align:center;padding:0 24px;
+  pointer-events:none;
+}
+#welcome h2{font-family:'Cinzel',serif;font-size:24px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-bottom:10px;}
+#welcome p{color:var(--muted);font-size:14px;line-height:1.75;}
+.ornament{color:var(--gold-dim);font-size:18px;margin-bottom:12px;letter-spacing:6px;}
+
+/* ── MESSAGES ── */
+.msg-wrap{max-width:780px;margin:0 auto 10px;padding:0 16px;display:flex;flex-direction:column;}
+.msg-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;display:flex;align-items:center;gap:4px;}
+.user-lbl{color:var(--muted);align-self:flex-end;}
+.ai-lbl{color:var(--gold);}
+.ai-lbl::before{content:'✦';font-size:8px;}
+.msg{padding:13px 16px;border-radius:14px;line-height:1.75;font-size:14.5px;word-break:break-word;}
+.msg.user{background:var(--user-bg);border:1px solid var(--border);border-top-right-radius:4px;align-self:flex-end;max-width:82%;white-space:pre-wrap;}
+.msg.ai{background:var(--ai-bg);border:1px solid #1c2030;border-top-left-radius:4px;align-self:flex-start;width:100%;max-width:100%;}
+
+/* markdown */
+.ai-content{white-space:pre-wrap;line-height:1.75;}
+.ai-content strong{color:var(--accent);font-weight:600;}
+.ai-content em{color:#aab3cc;font-style:italic;}
+.ai-content code{background:#1a1f2e;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:13px;color:#7dd3fc;}
+.ai-content pre{background:#0d1018;border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0;overflow-x:auto;}
+.ai-content pre code{background:none;border:none;padding:0;font-size:13px;color:#a5f3a0;}
+.ai-content h1,.ai-content h2,.ai-content h3{color:var(--accent);margin:14px 0 6px;font-family:'Cinzel',serif;}
+.ai-content h1{font-size:17px;}
+.ai-content h2{font-size:15px;}
+.ai-content h3{font-size:14px;}
+.ai-content ul,.ai-content ol{padding-left:20px;margin:8px 0;}
+.ai-content li{margin:4px 0;line-height:1.7;}
+.ai-content blockquote{border-left:3px solid var(--gold-dim);padding-left:12px;color:var(--muted);margin:10px 0;font-style:italic;}
+.ai-content hr{border:none;border-top:1px solid var(--border);margin:12px 0;}
+.ai-content table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+.ai-content th{background:rgba(201,144,42,.12);color:var(--accent);padding:7px 10px;border:1px solid var(--border);text-align:left;}
+.ai-content td{padding:6px 10px;border:1px solid var(--border);}
+.ai-content tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.msg-img{max-width:220px;max-height:170px;border-radius:8px;margin-bottom:8px;object-fit:cover;border:1px solid var(--border);display:block;}
+
+/* cursor */
+.cursor{display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:2px;vertical-align:text-bottom;animation:blink .7s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* typing dots */
+.typing{display:flex;gap:5px;padding:10px 4px;}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--gold-dim);animation:tbounce .9s ease-in-out infinite;}
+.typing span:nth-child(2){animation-delay:.18s;}
+.typing span:nth-child(3){animation-delay:.36s;}
+@keyframes tbounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px);background:var(--gold);}}
+
+/* ── FOOTER / INPUT (pinned bottom) ── */
+#footerWrap{background:var(--surface);border-top:1px solid var(--border);padding:10px 16px 14px;flex-shrink:0;position:relative;}
+#imgPreviewBar{display:none;margin-bottom:8px;max-width:780px;margin-left:auto;margin-right:auto;}
+#imgPreviewBar img{height:64px;border-radius:8px;border:1px solid var(--border);}
+#imgPreviewBar button{background:#dc3c3c;border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:11px;cursor:pointer;margin-left:6px;vertical-align:top;line-height:20px;}
+.input-row{max-width:780px;margin:0 auto;display:flex;align-items:flex-end;gap:8px;}
+.plus-btn{width:42px;height:42px;background:none;border:1.5px solid var(--border);border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;color:var(--muted);}
+.plus-btn:active{border-color:var(--gold-dim);color:var(--accent);}
+.plus-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+textarea{flex:1;background:#0d1018;border:1.5px solid var(--border);border-radius:11px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;padding:10px 14px;resize:none;max-height:140px;line-height:1.55;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+textarea:focus{border-color:var(--gold-dim);}
+textarea::placeholder{color:var(--muted);}
+.right-btns{display:flex;gap:6px;align-items:flex-end;}
+.icon-btn{width:42px;height:42px;border:none;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+#sendBtn{background:linear-gradient(135deg,var(--gold),#a06c18);box-shadow:0 2px 10px rgba(201,144,42,.3);}
+#sendBtn:active{opacity:.8;transform:scale(.96);}
+#sendBtn svg{width:16px;fill:#0a0c10;}
+#micBtn{background:#161a26;border:1.5px solid var(--border);}
+#micBtn:active{border-color:var(--gold-dim);}
+#micBtn.recording{background:rgba(220,60,60,.15);border-color:#dc3c3c;animation:rec-pulse 1s ease-in-out infinite;}
+#micBtn svg{width:17px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+#micBtn.recording svg{stroke:#dc3c3c;}
+@keyframes rec-pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,60,60,.4)}50%{box-shadow:0 0 0 6px rgba(220,60,60,0);}}
+.footer-hint{max-width:780px;margin:7px auto 0;text-align:center;font-size:11px;color:var(--muted);}
+
+/* ATTACH POPUP */
+#attachMenu{position:absolute;bottom:74px;left:16px;background:#13161f;border:1px solid var(--border);border-radius:12px;padding:6px;display:none;z-index:50;box-shadow:0 8px 28px rgba(0,0,0,.7);}
+#attachMenu.show{display:block;}
+.att-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;transition:all .18s;white-space:nowrap;}
+.att-item:active{background:rgba(201,144,42,.1);color:var(--accent);}
+.att-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── MODAL PAGES ── */
+.modal-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column;overflow-y:auto;}
+.modal-page.show{display:flex;}
+.modal-head{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:1;}
+.modal-head h2{font-family:'Cinzel',serif;font-size:16px;color:var(--accent);}
+.back-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;display:flex;align-items:center;gap:5px;font-size:13px;transition:color .2s;border-radius:8px;}
+.back-btn:active{color:var(--accent);background:rgba(201,144,42,.08);}
+.back-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.modal-body{padding:22px 18px 40px;max-width:680px;margin:0 auto;width:100%;}
+.modal-body h3{font-family:'Cinzel',serif;font-size:19px;color:var(--accent);margin-bottom:14px;}
+.modal-body p{color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:10px;}
+.modal-body ul{color:var(--muted);font-size:14px;line-height:1.9;padding-left:20px;margin-bottom:10px;}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+.info-card h4{color:var(--accent);font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.badge{display:inline-block;background:rgba(201,144,42,.15);color:var(--gold);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid var(--gold-dim);}
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeMenu()"></div>
+
+<!-- ═══ SIDE MENU ═══ -->
+<div id="menu">
+  <div class="menu-head">
+    <img src="/icon-192.png" style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;" alt="O">
+    <h2>Oguz AI</h2>
+  </div>
+  <div class="menu-sections">
+    <button class="menu-item" onclick="openPage('about')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Biz barada
+    </button>
+    <button class="menu-item" onclick="openPage('complaint')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Arz etmek
+    </button>
+    <div class="menu-divider"></div>
+    <div class="recents-label">Soňky söhbetler</div>
+    <div id="recentsList"></div>
+  </div>
+  <div class="menu-footer">
+    <button class="new-chat-btn" onclick="newChat()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Täze Chat
+    </button>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Menýu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <img src="/icon-192.png" class="header-logo" alt="Oguz AI">
+  <div class="header-info">
+    <h1>OGUZ AI</h1>
+    <p>Türkmen Emeli Aň · V3.0</p>
+  </div>
+  <div class="status-pill"><div class="dot"></div>Işjeň</div>
+</header>
+
+<!-- ═══ CHAT ═══ -->
+<div id="chatWrap">
+  <div id="chat">
+    <div id="welcome">
+      <div class="ornament">◈ ◈ ◈</div>
+      <h2>Oguz AI-a Hoş Geldiňiz</h2>
+
+    </div>
+  </div>
+
+  <!-- ATTACH POPUP -->
+  <div id="attachMenu">
+    <div class="att-item" onclick="triggerGallery()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Galerýadan surat
+    </div>
+    <div class="att-item" onclick="triggerCamera()">
+      <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Kamera
+    </div>
+  </div>
+</div>
+
+<input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleImg(event)">
+<input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleImg(event)">
+
+<!-- ═══ FOOTER ═══ -->
+<div id="footerWrap">
+  <div id="imgPreviewBar">
+    <img id="prevThumb" src="" alt="">
+    <button onclick="clearImg()">✕</button>
+  </div>
+  <div class="input-row">
+    <button class="plus-btn" id="plusBtn" onclick="toggleAttach()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <textarea id="inp" rows="1" placeholder="Soraglaryňyz…" maxlength="6000"></textarea>
+    <div class="right-btns">
+      <button class="icon-btn" id="micBtn" onclick="toggleMic()">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <button class="icon-btn" id="sendBtn" onclick="send()">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+  <p class="footer-hint">Oguz AI ýalňyşlyk edip biler — möhüm maglumaty barlaň.</p>
+</div>
+
+<!-- ═══ BIZ BARADA ═══ -->
+<div class="modal-page" id="aboutPage">
+  <div class="modal-head">
+    <button class="back-btn" onclick="closePage('aboutPage')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Yzyna
+    </button>
+    <h2>Biz barada</h2>
+  </div>
+  <div class="modal-body">
+    <div class="info-card">
+      <h4>🏺 Oguz AI — Näme bu?</h4>
+      <p>Oguz AI — türkmen dilinde döredilen <strong style="color:var(--accent)">ilkinji professional emeli aň kömekçisidir</strong>. Bu ulgam esasan <span class="badge">Okuwçylar</span> <span class="badge">Talyplar</span> <span class="badge">Mugallymlar</span> üçin döredildi, ýöne islendik adam hem ulanyp biler.</p>
+      <p>Adymyz türkmenleriň beýik atasy <strong style="color:var(--accent)">Oguz han</strong> neslinden ylham alýar — güýç, paýhas we mertligiň nyşany.</p>
+    </div>
+    <div class="info-card">
+      <h4>🧠 Nähili işleýär?</h4>
+      <p>Oguz AI iň döwrebap emeli aň tehnologiýasyny ulanýar. Siziň soralyňyzy okap, derňäp, <strong style="color:var(--accent)">jikme-jik we takyk jogap</strong> berýär. Surat iberseňiz, ony hem görüp, düşündirip bilýär.</p>
+      <ul>
+        <li>🔤 Türkmen, Rus, Iňlis dillerinde gürleşýär</li>
+        <li>📸 Suratlary görüp analiz edýär</li>
+        <li>🎤 Ses bilen kabul edýär (mikrofon)</li>
+        <li>💾 Söhbetleri ýatda saklaýar (Recents)</li>
+        <li>⚡ Pes internetde hem işleýär</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>📚 Näme üçin döredildi?</h4>
+      <p>Türkmenistanda bilim almak isleýän ýaşlar üçin öz dillerinde güýçli emeli aň ýokdy. Oguz AI bu boşlugy doldurmak üçin döredildi.</p>
+      <ul>
+        <li>🏫 Mekdep derslerini düşünmäge kömek</li>
+        <li>🎓 Ýokary okuw işlerini ýerine ýetirmäge</li>
+        <li>👩‍🏫 Mugallymlar üçin sapak meýilnamasy</li>
+        <li>💻 Kod ýazmak we programmirleme öwrenmek</li>
+        <li>🌍 Terjime we dil öwrenmek</li>
+        <li>🔬 Ylmy temalar: matematika, fizika, himiýa</li>
+        <li>✍️ Döredijilik: goşgy, hekaýa, makala</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>🔒 Maglumat howpsuzlygy</h4>
+      <p>Siziň söhbetleriňiz diňe <strong style="color:var(--accent)">öz enjamyňyzda</strong> saklanýar. Biz siziň şahsy maglumatyňyzy hiç ýere ibermýäris.</p>
+    </div>
+    <div class="info-card">
+      <h4>⚙️ Tehniki maglumat</h4>
+      <p>Oguz AI <strong style="color:var(--accent)">Claude Sonnet</strong> emeli aň modeliniň üstünde guruldy we türkmen ulanyjylary üçin ýörite sazlandy.</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--muted);">Wersiýa: <span class="badge">v3.0</span> · 2025 · Türkmenistan 🇹🇲</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ARZ ETMEK ═══ -->
+<div class="modal-page" id="complaintPage">
+  <div class="modal-head">
+    <button class="back-btn" onclick="closePage('complaintPage')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Yzyna
+    </button>
+    <h2>Arz etmek</h2>
+  </div>
+  <div class="modal-body">
+    <div class="info-card">
+      <h4>📝 Arzňyz ýa-da teklibiňiz</h4>
+      <textarea id="complaintText" rows="6" style="width:100%;background:#0a0c10;border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:12px;resize:vertical;margin-top:8px;outline:none;-webkit-appearance:none;" placeholder="Näme üýtgeşiklik isleýärsiňiz? Näme bilen razy däl? Teklibiňiz näme?"></textarea>
+      <button onclick="submitComplaint()" style="margin-top:12px;width:100%;background:linear-gradient(135deg,var(--gold),#a06c18);border:none;padding:12px;border-radius:10px;color:#0a0c10;font-weight:600;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;">✉️ Ibermek</button>
+      <div id="complaintMsg" style="margin-top:10px;font-size:13px;color:#34c77b;display:none;text-align:center;">✅ Arzňyz üstünlikli iberildi! Sag boluň.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// SYSTEM PROMPT
+// ════════════════════════════════════════
+const SYSTEM = `Sen Oguz AI — güýçli türkmen emeli aňy. Okuwçylar, talyplar, mugallymlar we ähli adamlar üçin döredilen.
+
+DÖREDIJILIK DÜZGÜNLERI:
+1. Dil: türkmençe sorag → türkmençe, rusça → rusça, iňlisçe → iňlisçe
+2. Islendik jogabyňy GIŇIŞLEÝIN we JIKME-JIK ber. Ýüzleý jogap berme!
+3. Emoji ulan: 🎯📚🔬💡⚡🌟✨🧠🎓🏆 — gyzykly et
+4. Gurluş: Bölümlere bölüp ber, sanawlar we tablisalar ulan
+5. Mysal: Her düşündirişde hakyky mysal goş
+6. Ahyrynda: Gysgajyk pähimli söz we "Sen näme pikir edýärsiň? 🤔" ýaly sorag goş
+7. Başlangyjy: "Gowy sorag! 👍" ýa "Ajaýyp! ✨" bilen başla
+8. Kod soranda: düşündirilen, işleýän kod ber
+
+ÖZÜŇ BARADA SORANDA: "Biz barada giňişleýin maglumat almak üçin ☰ menýudan 'Biz barada' bölümine giriň! 📖 Ol ýerde Oguz AI barada ähli zat ýazylan. Gysgaça aýtsam: Men okuwçylar we talyplar üçin döredilen türkmen emeli aňy, siziň ähli soraglaryňyza jikme-jik jogap bermäge taýýar! 🎓"
+
+GADAGAN: gysgaça "hawa/ýok" jogaplar, pikirsiz ýüzleý jogap.`;
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+const chatEl  = document.getElementById('chat');
+const inpEl   = document.getElementById('inp');
+let messages  = [];
+let busy      = false;
+let recording = false;
+let recognition = null;
+let currentChatId = Date.now().toString();
+let pendingImage  = null;
+
+// ════════════════════════════════════════
+// TEXTAREA AUTO-RESIZE
+// ════════════════════════════════════════
+inpEl.addEventListener('input', () => {
+  inpEl.style.height = 'auto';
+  inpEl.style.height = Math.min(inpEl.scrollHeight, 140) + 'px';
+});
+inpEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+// ════════════════════════════════════════
+// LOCAL STORAGE
+// ════════════════════════════════════════
+function saveChat() {
+  if (!messages.length) return;
+  try {
+    const all = JSON.parse(localStorage.getItem('oguz_v3') || '{}');
+    const first = messages.find(m => m.role === 'user');
+    let title = 'Söhbet';
+    if (first) {
+      const c = first.content;
+      title = (typeof c === 'string' ? c : (c.find(x=>x.type==='text')?.text||'Söhbet')).slice(0,48);
+    }
+    all[currentChatId] = { id:currentChatId, title, ts:Date.now(), messages };
+    localStorage.setItem('oguz_v3', JSON.stringify(all));
+    renderRecents();
+  } catch(e) { console.warn('save err',e); }
+}
+
+function renderRecents() {
+  const list = document.getElementById('recentsList');
+  try {
+    const all    = JSON.parse(localStorage.getItem('oguz_v3') || '{}');
+    const sorted = Object.values(all).sort((a,b)=>b.ts-a.ts).slice(0,30);
+    if (!sorted.length) { list.innerHTML='<div class="no-recents">Entek söhbet ýok</div>'; return; }
+    list.innerHTML = sorted.map(c=>`
+      <button class="recent-item" onclick="loadChat('${c.id}')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span>${escHtml(c.title)}</span>
+      </button>`).join('');
+  } catch(e) { list.innerHTML='<div class="no-recents">Ýalňyşlyk</div>'; }
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadChat(id) {
+  try {
+    const all = JSON.parse(localStorage.getItem('oguz_v3')||'{}');
+    const c = all[id]; if(!c) return;
+    currentChatId = id;
+    messages = c.messages;
+    chatEl.innerHTML = '';
+    messages.forEach(m => {
+      if (typeof m.content === 'string') renderMsg(m.role, m.content);
+      else if (Array.isArray(m.content)) {
+        const txt = m.content.find(p=>p.type==='text')?.text || '';
+        const img = m.content.find(p=>p.type==='image');
+        renderMsg(m.role, txt, img?'data:'+img.source.media_type+';base64,'+img.source.data:null);
+      }
+    });
+    closeMenu();
+  } catch(e) { console.warn(e); }
+}
+
+// ════════════════════════════════════════
+// MENU / PAGES
+// ════════════════════════════════════════
+function toggleMenu() {
+  document.getElementById('menu').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+  renderRecents();
+}
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+function openPage(n)  { closeMenu(); document.getElementById(n+'Page').classList.add('show'); }
+function closePage(id){ document.getElementById(id).classList.remove('show'); }
+
+// ════════════════════════════════════════
+// NEW CHAT
+// ════════════════════════════════════════
+function newChat() {
+  saveChat();
+  currentChatId = Date.now().toString();
+  messages = [];
+  clearImg();
+  chatEl.innerHTML = `
+    <div id="welcome">
+      <div class="ornament">◈ ◈ ◈</div>
+      <h2>Oguz AI-a Hoş Geldiňiz</h2>
+
+    </div>`;
+  inpEl.value = ''; inpEl.style.height = 'auto';
+  closeMenu();
+}
+
+// ════════════════════════════════════════
+// ATTACH
+// ════════════════════════════════════════
+function toggleAttach() {
+  document.getElementById('attachMenu').classList.toggle('show');
+}
+document.addEventListener('click', e => {
+  const m = document.getElementById('attachMenu');
+  if (!m.contains(e.target) && !e.target.closest('#plusBtn')) m.classList.remove('show');
+});
+function triggerGallery(){ document.getElementById('galleryInput').click(); document.getElementById('attachMenu').classList.remove('show'); }
+function triggerCamera() { document.getElementById('cameraInput').click();  document.getElementById('attachMenu').classList.remove('show'); }
+function handleImg(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const dataUrl = ev.target.result;
+    pendingImage = { base64: dataUrl.split(',')[1], mediaType: file.type, previewUrl: dataUrl };
+    document.getElementById('imgPreviewBar').style.display = 'block';
+    document.getElementById('prevThumb').src = dataUrl;
+  };
+  r.readAsDataURL(file);
+  e.target.value = '';
+}
+function clearImg() {
+  pendingImage = null;
+  document.getElementById('imgPreviewBar').style.display = 'none';
+  document.getElementById('prevThumb').src = '';
+}
+
+// ════════════════════════════════════════
+// MICROPHONE
+// ════════════════════════════════════════
+function toggleMic() { recording ? stopMic() : startMic(); }
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Brauzeriňiz ses tanamany goldamaýar.'); return; }
+  recognition = new SR();
+  recognition.lang = 'tk';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.onstart  = () => { recording=true; document.getElementById('micBtn').classList.add('recording'); };
+  recognition.onresult = e => {
+    let t=''; for(let i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript;
+    inpEl.value=t; inpEl.style.height='auto'; inpEl.style.height=Math.min(inpEl.scrollHeight,140)+'px';
+  };
+  recognition.onend   = () => stopMic();
+  recognition.onerror = () => stopMic();
+  recognition.start();
+}
+function stopMic() {
+  recording=false;
+  document.getElementById('micBtn').classList.remove('recording');
+  if(recognition){recognition.stop();recognition=null;}
+}
+
+// ════════════════════════════════════════
+// MARKDOWN
+// ════════════════════════════════════════
+function md(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/```(\w*)\n?([\s\S]*?)```/g,(_,l,c)=>`<pre><code>${c.trim()}</code></pre>`)
+    .replace(/`([^`\n]+)`/g,'<code>$1</code>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*\n]+)\*/g,'<em>$1</em>')
+    .replace(/^---$/gm,'<hr>')
+    .replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
+    .replace(/^\s*[-•*]\s+(.+)$/gm,'<li>$1</li>')
+    .replace(/^\s*\d+\.\s+(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>')
+    .replace(/\n(?!<[/]?(ul|ol|li|pre|h[1-3]|blockquote|hr))/g,'<br>');
+}
+
+// ════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════
+function renderMsg(role, text, imgUrl) {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap';
+  const lbl = document.createElement('div');
+  lbl.className = 'msg-label ' + (role==='user'?'user-lbl':'ai-lbl');
+  lbl.textContent = role==='user' ? 'Siz' : 'Oguz AI';
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'msg ' + role;
+
+  if (imgUrl) {
+    const im=document.createElement('img'); im.src=imgUrl; im.className='msg-img'; msgDiv.appendChild(im);
+  }
+  if (role==='ai') {
+    const d=document.createElement('div'); d.className='ai-content'; d.innerHTML=md(text); msgDiv.appendChild(d);
+  } else {
+    const d=document.createElement('div'); d.style.whiteSpace='pre-wrap'; d.textContent=text; msgDiv.appendChild(d);
+  }
+  wrap.appendChild(lbl); wrap.appendChild(msgDiv); chatEl.appendChild(wrap);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function createStream() {
+  const w = document.getElementById('welcome'); if(w) w.remove();
+  const wrap=document.createElement('div'); wrap.className='msg-wrap'; wrap.id='sw';
+  const lbl=document.createElement('div'); lbl.className='msg-label ai-lbl'; lbl.textContent='Oguz AI';
+  const msgDiv=document.createElement('div'); msgDiv.className='msg ai';
+  const cont=document.createElement('div'); cont.className='ai-content'; cont.id='sc';
+  const cur=document.createElement('span'); cur.className='cursor'; cur.id='scur';
+  msgDiv.appendChild(cont); msgDiv.appendChild(cur);
+  wrap.appendChild(lbl); wrap.appendChild(msgDiv); chatEl.appendChild(wrap);
+  chatEl.scrollTop=chatEl.scrollHeight;
+}
+function updateStream(t) {
+  const c=document.getElementById('sc'); if(c){c.innerHTML=md(t); chatEl.scrollTop=chatEl.scrollHeight;}
+}
+function finalStream() {
+  const cur=document.getElementById('scur'); if(cur)cur.remove();
+  const w=document.getElementById('sw'); if(w)w.id='';
+}
+
+// ════════════════════════════════════════
+// SEND (streaming + fallback)
+// ════════════════════════════════════════
+async function send() {
+  const text = inpEl.value.trim();
+  if ((!text && !pendingImage) || busy) return;
+  busy = true;
+  inpEl.value=''; inpEl.style.height='auto';
+
+  let userContent, displayImg=null;
+  if (pendingImage) {
+    displayImg = pendingImage.previewUrl;
+    userContent = [
+      {type:'image',source:{type:'base64',media_type:pendingImage.mediaType,data:pendingImage.base64}},
+      {type:'text', text: text||'Bu surata seret we jikme-jik düşündir.'}
+    ];
+    clearImg();
+  } else { userContent = text; }
+
+  const userText = typeof userContent==='string' ? userContent : (userContent.find(c=>c.type==='text')?.text||'');
+  renderMsg('user', userText, displayImg);
+  messages.push({role:'user', content:userContent});
+  createStream();
+
+  const body = JSON.stringify({
+    model:'claude-sonnet-4-6',
+    max_tokens:2000,
+    stream:true,
+    system:SYSTEM,
+    messages
+  });
+
+  let fullText = '';
+
+  // Try streaming first
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body
+    });
+
+    if (!res.ok || !res.body) throw new Error('stream_fail');
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+
+    while(true) {
+      const {done,value} = await reader.read();
+      if(done) break;
+      buf += decoder.decode(value,{stream:true});
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data: ')) continue;
+        const d = line.slice(6).trim();
+        if(d==='[DONE]') continue;
+        try{
+          const p = JSON.parse(d);
+          if(p.type==='content_block_delta' && p.delta?.type==='text_delta'){
+            fullText += p.delta.text;
+            updateStream(fullText);
+          }
+        }catch{}
+      }
+    }
+    finalStream();
+
+  } catch(streamErr) {
+    // Fallback: non-streaming
+    try {
+      const res2 = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-6',
+          max_tokens:2000,
+          system:SYSTEM,
+          messages
+        })
+      });
+      const data = await res2.json();
+      finalStream();
+      fullText = data.content?.map(b=>b.text||'').join('') || ('⚠️ '+(data.error?.message||'Ýalňyşlyk'));
+      updateStream(fullText);
+    } catch(e2) {
+      finalStream();
+      fullText = '⚠️ Bağlanyşyk ýalňyşlygy. Internet bağlanyşygyňyzy barlaň.';
+      updateStream(fullText);
+    }
+  }
+
+  if (fullText) {
+    messages.push({role:'assistant', content:fullText});
+    if(messages.length>40) messages=messages.slice(-30);
+    saveChat();
+  }
+  busy = false;
+}
+
+// ════════════════════════════════════════
+// COMPLAINT
+// ════════════════════════════════════════
+function submitComplaint() {
+  const t = document.getElementById('complaintText').value.trim(); if(!t) return;
+  document.getElementById('complaintMsg').style.display='block';
+  document.getElementById('complaintText').value='';
+  setTimeout(()=>document.getElementById('complaintMsg').style.display='none',4000);
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+renderRecents();
+
+// Register Service Worker (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
